@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Net;
 using Modbus.Device;
 using System.Net.Sockets;
+using WpfApp.Model;
 
 
 
@@ -29,6 +30,17 @@ class DataTable
     }
     public string iAddr { get; set; }
     public string iValue { get; set; }
+   
+}
+
+public class Constans
+{
+    public const string sClient_default = "1";
+    public const string sIP_default = "127.0.0.1";
+    public const string sTCP_default = "502";
+    public const string sCountNewValues_default = "3";
+    public const string sStartValue_default = "1";
+    public const string sStep_default = "10";
 }
 
 namespace WpfApp
@@ -39,61 +51,25 @@ namespace WpfApp
         TcpListener Listener;
 
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
-        string strReg = @"^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-5][0-9][0-9][0-9][0-9]|6[0-5][0-5][0-3][0-5])$";
 
         public MainWindow()
         {
             InitializeComponent();
-            edtClient.Text = "1";
-            edtIP.Text = "127.0.0.1";
-            edtRegAddr.Text = "2";
-            edtTCP.Text = "502";
-            edtRegValue.Text = "333";
+
+            DataForConnection objectInfo = new DataForConnection
+            {
+                sIPAdr = Constans.sIP_default,
+                sPortTCP = Constans.sTCP_default,
+                sClient = Constans.sClient_default,
+                sCountNewValues = Constans.sCountNewValues_default,
+                sStartValue = Constans.sStartValue_default,
+                sStep = Constans.sStep_default
+            };
+
+            this.DataContext = objectInfo;
+
         }
 
-        private void CheckEdt(int flag)
-        {
-
-            if (flag == 0)
-            {
-                Match match1 = Regex.Match(edtIP.Text, @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
-                if (!match1.Success)
-                {
-                    edtIP.Text = "127.0.0.1";
-                    MessageBox.Show("Некорректный IP адрес");
-                }
-            }
-            else if (flag == 1)
-            {
-                Match match = Regex.Match(edtTCP.Text, strReg);
-                if (!match.Success)
-                {
-                    edtTCP.Text = "502";
-                    MessageBox.Show("Некорректный порт");
-                }
-            }
-            else if (flag == 2)
-            {
-                Match match = Regex.Match(edtRegAddr.Text, strReg);
-                if (!match.Success)
-                {
-                    edtRegAddr.Text = "2";
-                    MessageBox.Show("Некорректный рег.адрес");
-                }
-            }
-            else if (flag == 3)
-            {
-                int count = int.Parse(edtStartValue.Text) + int.Parse(edtStep.Text);
-                Match match = Regex.Match(edtStartValue.Text, strReg);
-                Match match1 = Regex.Match(count.ToString(), strReg);
-                if (!match.Success || !match1.Success)
-                {
-                    edtStartValue.Text = "1";
-                    edtStep.Text = "10";
-                    MessageBox.Show("Недопустимый диапозон вывода в таблицу");
-                }
-            }
-        }
 
         private void UpdateDataGrid()
         {
@@ -109,7 +85,7 @@ namespace WpfApp
         private string RegisterType(int rAddr, int flag)
         {
 
-            // 0 - H; 1 - I; 2 - C; 3 - DI 
+          /*  // 0 - H; 1 - I; 2 - C; 3 - DI 
             if (cbTypeRegister.SelectedIndex == 0)
             {
                 var register = Slave.DataStore.HoldingRegisters;
@@ -151,7 +127,7 @@ namespace WpfApp
                 if (flag == 0)
                     register[rAddr] = rValue;
                 return register[rAddr].ToString();
-            }
+            }*/
             return "error";
         }
 
@@ -188,11 +164,12 @@ namespace WpfApp
 
         private void btnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            
-            int rAddr = int.Parse(edtRegAddr.Text);
 
-            RegisterType(rAddr, 0);
+            //  int rAddr = int.Parse(edtRegAddr.Text);
 
+            //  RegisterType(rAddr, 0);
+            dtRegValues.IsEnabled = false;
+            dtRegValues.Visibility = Visibility.Collapsed;
             UpdateDataGrid();
         }
 
@@ -212,24 +189,42 @@ namespace WpfApp
             UpdateDataGrid();
         }
 
-        private void edtIP_LostFocus(object sender, RoutedEventArgs e)
+
+        private void cbTypeRegister_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CheckEdt(0);
+            // 0 - H; 1 - I; 2 - C; 3 - DI 
+            if (cbTypeRegister.SelectedIndex == 0) 
+            {
+                //12345
+            }
+            else if (cbTypeRegister.SelectedIndex == 1)
+            {
+                //12345
+            }
+            else if (cbTypeRegister.SelectedIndex == 2)
+            {
+                //true
+            }
+            else if (cbTypeRegister.SelectedIndex == 3)
+            {
+                //true
+            }
         }
 
-        private void edtTCP_LostFocus(object sender, RoutedEventArgs e)
+        private void edtCountNewValues_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            CheckEdt(1);
-        }
-
-        private void edtRegAddr_LostFocus(object sender, RoutedEventArgs e)
-        {
-            CheckEdt(2);
-        }
-
-        private void edtStartValue_LostFocus(object sender, RoutedEventArgs e)
-        {
-            CheckEdt(3);
+            dtRegValues.IsEnabled = true;
+            dtRegValues.Visibility = Visibility.Visible;
+            //генерация нужного количества строк
+            int countRowNewValues = 0;
+            dtRegValues.Items.Clear();
+            if (edtCountNewValues.Text != "" && int.TryParse(edtCountNewValues.Text, out countRowNewValues))
+            {               
+                for (int i = 0; i < countRowNewValues; i++)
+                {
+                    dtRegValues.Items.Add("");
+                }
+            }
         }
     }
 }
