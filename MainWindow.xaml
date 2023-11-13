@@ -196,16 +196,16 @@
             </TextBox.Style>
         </TextBox>
         <Label x:Name="lblStep" Content="Шаг:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="516,279,0,0" Height="26" Width="35"/>
-        <DataGrid x:Name="dtRegValues" Margin="358,20,0,0"  MinColumnWidth="104" CanUserResizeColumns="False" Width="308" MaxWidth="308" Height="242" MaxHeight="242" HorizontalAlignment="Left" VerticalAlignment="Top" CanUserSortColumns="False" CanUserReorderColumns="False" AutoGenerateColumns="False" HeadersVisibility="Column">
+        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValue}" Margin="358,20,0,0"  MinColumnWidth="104" CanUserResizeColumns="False" Width="308" MaxWidth="308" Height="242" MaxHeight="242" HorizontalAlignment="Left" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding arrayRegAddress}" Header="Рег.адрес" MinWidth="100" Width="*">
+                <DataGridTextColumn Header="Рег.адрес" MinWidth="100" Width="*">
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding arrayRegValues}" Header="Рег.значение" MinWidth="155" Width="*" >
+                <DataGridTextColumn Header="Рег.значение" MinWidth="155" Width="*" >
                         <DataGridTextColumn.HeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Center" />

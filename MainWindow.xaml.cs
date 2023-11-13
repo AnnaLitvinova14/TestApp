@@ -16,32 +16,9 @@ using System.Text.RegularExpressions;
 using System.Net;
 using Modbus.Device;
 using System.Net.Sockets;
-using WpfApp.Model;
 
 
 
-
-class DataTable
-{
-    public DataTable(string iAddr, string iValue)
-    {
-        this.iAddr = iAddr;
-        this.iValue = iValue;
-    }
-    public string iAddr { get; set; }
-    public string iValue { get; set; }
-   
-}
-
-public class Constans
-{
-    public const string sClient_default = "1";
-    public const string sIP_default = "127.0.0.1";
-    public const string sTCP_default = "502";
-    public const string sCountNewValues_default = "3";
-    public const string sStartValue_default = "1";
-    public const string sStep_default = "10";
-}
 
 namespace WpfApp
 {
@@ -67,7 +44,7 @@ namespace WpfApp
             };
 
             this.DataContext = objectInfo;
-
+            List<DataNewRegValues> NewRegValue = new List<DataNewRegValues>(int.Parse(objectInfo.sCountNewValues));
         }
 
 
