@@ -16,9 +16,8 @@ using System.Text.RegularExpressions;
 using System.Net;
 using Modbus.Device;
 using System.Net.Sockets;
-
-
-
+using System.Collections.ObjectModel;
+using System.Net.Http;
 
 namespace WpfApp
 {
@@ -26,53 +25,56 @@ namespace WpfApp
     {        
         ModbusTcpSlave Slave;
         TcpListener Listener;
-
+        ModbusIpMaster master;
+        public ObservableCollection<DataNewRegValues> collectionRegValues = new ObservableCollection<DataNewRegValues>();
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
-
+        DataForConnection objectInfo;
         public MainWindow()
         {
             InitializeComponent();
 
-            DataForConnection objectInfo = new DataForConnection
+            objectInfo = new DataForConnection
             {
                 sIPAdr = Constans.sIP_default,
                 sPortTCP = Constans.sTCP_default,
                 sClient = Constans.sClient_default,
                 sCountNewValues = Constans.sCountNewValues_default,
                 sStartValue = Constans.sStartValue_default,
-                sStep = Constans.sStep_default
-            };
+                sStep = Constans.sStep_default,
+                NewRegValues = collectionRegValues //подвязали коллекцию таблицы к свойству графического элемента
+            }; 
 
             this.DataContext = objectInfo;
-            List<DataNewRegValues> NewRegValue = new List<DataNewRegValues>(int.Parse(objectInfo.sCountNewValues));
+
         }
 
 
         private void UpdateDataGrid()
         {
-            int length = int.Parse(edtStep.Text);
+            /* int length = int.Parse(edtStep.Text);
+             List<DataTable> dTable = new List<DataTable>(length);
+             for (int i = int.Parse(edtStartValue.Text); i < length + int.Parse(edtStartValue.Text); i++)
+             {
+                 dTable.Add(new DataTable(i.ToString(), RegisterType(i, 1)));
+             }
+             dtGrid.ItemsSource = dTable; */
+
+            int length = int.Parse(edtStep.Text); //objectInfo.sStep
             List<DataTable> dTable = new List<DataTable>(length);
             for (int i = int.Parse(edtStartValue.Text); i < length + int.Parse(edtStartValue.Text); i++)
             {
                 dTable.Add(new DataTable(i.ToString(), RegisterType(i, 1)));
             }
             dtGrid.ItemsSource = dTable;
+
         }
 
         private string RegisterType(int rAddr, int flag)
         {
 
-          /*  // 0 - H; 1 - I; 2 - C; 3 - DI 
-            if (cbTypeRegister.SelectedIndex == 0)
-            {
-                var register = Slave.DataStore.HoldingRegisters;
-                ushort rValue = 0; 
-                if (edtRegValue.Text != "") rValue = ushort.Parse(edtRegValue.Text);
-                if (flag == 0)
-                    register[rAddr] = rValue;
-                return register[rAddr].ToString();
-            }
-            else if (cbTypeRegister.SelectedIndex == 1)
+            // 0 - H; 1 - I; 2 - C; 3 - DI 
+
+          /*  else if (cbTypeRegister.SelectedIndex == 1)
             {
                 var register = Slave.DataStore.InputRegisters; 
                 ushort rValue = ushort.Parse(edtRegValue.Text);
@@ -110,14 +112,13 @@ namespace WpfApp
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
-            IPAddress IPAdr = IPAddress.Parse(edtIP.Text);
-            int PortTCP = int.Parse(edtTCP.Text); 
             if (btnStart.Content.ToString() == "Запустить")
             {
                 btnStart.Content = "Остановить";
-                Listener = new TcpListener(IPAdr, PortTCP);
+                Listener = new TcpListener(IPAddress.Parse(objectInfo.sIPAdr), int.Parse(objectInfo.sPortTCP));
                 Listener.Start();
-                Slave = ModbusTcpSlave.CreateTcp(1, Listener);              
+                Slave = ModbusTcpSlave.CreateTcp(Constans.slaveID, Listener);
+                master = ModbusIpMaster.CreateIp((Modbus.IO.IStreamResource)Slave.Masters[0].Client);
                 Slave.Listen();
                 
                 btnUpdateData.IsEnabled = true;
@@ -156,13 +157,14 @@ namespace WpfApp
             
             if (Slave.Masters.Count > iClient)
             {
+                //если подключается больше клиентов, чем указано
                 for (int i = iClient; i < Slave.Masters.Count; i++)
-                {
-                    lblStep.Content = i.ToString();
-                    
+                {   
+                    //закрыть соединение
                     Slave.Masters[i].Client.Disconnect(false);
                 }
             }
+
             UpdateDataGrid();
         }
 
@@ -170,38 +172,64 @@ namespace WpfApp
         private void cbTypeRegister_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // 0 - H; 1 - I; 2 - C; 3 - DI 
-            if (cbTypeRegister.SelectedIndex == 0) 
+            if (objectInfo != null)
             {
-                //12345
-            }
-            else if (cbTypeRegister.SelectedIndex == 1)
-            {
-                //12345
-            }
-            else if (cbTypeRegister.SelectedIndex == 2)
-            {
-                //true
-            }
-            else if (cbTypeRegister.SelectedIndex == 3)
-            {
-                //true
+                int countRecords = int.Parse(objectInfo.sStep);
+                int iStartValue = int.Parse(objectInfo.sStartValue);
+                ushort uStartValue = ushort.Parse(objectInfo.sStartValue);
+                ushort uStep = ushort.Parse(objectInfo.sStep);
+
+                if (cbTypeRegister.SelectedIndex == 0)
+                {
+                    //вывести на редактирование рег.адрес и текущие значения  
+                    ushort[] registersHolding = master.ReadHoldingRegisters(Constans.slaveID, uStartValue, uStep);
+
+                    for (int i = iStartValue; i < countRecords + iStartValue; i++)
+                    {
+                        DataNewRegValues item = new DataNewRegValues(i.ToString(), registersHolding[i].ToString(), "");
+                        collectionRegValues.Add(item);
+                    }
+                }
+                else if (cbTypeRegister.SelectedIndex == 1)
+                {
+                    //12345
+                }
+                else if (cbTypeRegister.SelectedIndex == 2)
+                {
+                    bool[] registersCoil = master.ReadCoils(Constans.slaveID, uStartValue, uStep);
+
+                    for (int i = iStartValue; i < countRecords + iStartValue; i++)
+                    {
+                        DataNewRegValues item = new DataNewRegValues(i.ToString(), registersCoil[i].ToString(), "");
+                        collectionRegValues.Add(item);
+                    }
+
+                }
+                else if (cbTypeRegister.SelectedIndex == 3)
+                {
+                    //true
+                }
             }
         }
 
         private void edtCountNewValues_SelectionChanged(object sender, RoutedEventArgs e)
         {
+            
             dtRegValues.IsEnabled = true;
             dtRegValues.Visibility = Visibility.Visible;
+            /*
             //генерация нужного количества строк
             int countRowNewValues = 0;
-            dtRegValues.Items.Clear();
+            string s = "";
+            collectionRegValues.Clear(); 
             if (edtCountNewValues.Text != "" && int.TryParse(edtCountNewValues.Text, out countRowNewValues))
             {               
                 for (int i = 0; i < countRowNewValues; i++)
                 {
-                    dtRegValues.Items.Add("");
+                    DataNewRegValues item = new DataNewRegValues(s,s);
+                    collectionRegValues.Add(item);
                 }
-            }
+            }*/
         }
     }
 }

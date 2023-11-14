@@ -14,5 +14,7 @@ namespace WpfApp
         public const string sCountNewValues_default = "3";
         public const string sStartValue_default = "1";
         public const string sStep_default = "10";
+        public const int CONST_REG_INPUT = 123;
+        public const byte slaveID = 1;
     }
 }

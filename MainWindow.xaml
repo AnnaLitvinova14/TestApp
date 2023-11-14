@@ -7,7 +7,7 @@
         xmlns:validation="clr-namespace:WpfApp.Validations"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Name="FormTestApp" x:Class="WpfApp.MainWindow"
         mc:Ignorable="d"
-        Title="Тестовое задание" Height="351.072" Width="718" ResizeMode="NoResize">
+        Title="Тестовое задание" Height="351.072" Width="785" ResizeMode="NoResize">
     <Window.Resources>
         <ControlTemplate x:Key="ValidationError">
             <StackPanel Orientation="Horizontal">
@@ -17,13 +17,13 @@
             </StackPanel>
         </ControlTemplate>
     </Window.Resources>
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Label x:Name="lblStatus" Content="Статус: -" HorizontalAlignment="Left" Margin="22,279,0,0" VerticalAlignment="Top" Height="32" Width="178"/>
         <Button x:Name="btnStart" Content="Запустить" HorizontalAlignment="Left" Margin="246,282,0,0" VerticalAlignment="Top" Width="75" Click="btnStart_Click" Height="19"/>
-        <GroupBox x:Name="grBoxData" Header="Настройки параметров подключения:" Height="258" Margin="24,7,0,0" VerticalAlignment="Top" Width="298" BorderBrush="#FF474A4C" Foreground="Black" OpacityMask="Black" HorizontalAlignment="Left">
-            <Grid x:Name="gridSettings" HorizontalAlignment="Left" Height="241" Margin="-3,-2,-5.4,-3.8" VerticalAlignment="Top" Width="294">
+        <GroupBox x:Name="grBoxData" Header="Настройки параметров подключения:" Height="258" Margin="24,7,0,0" VerticalAlignment="Top" Width="321" BorderBrush="#FF474A4C" Foreground="Black" OpacityMask="Black" HorizontalAlignment="Left">
+            <Grid x:Name="gridSettings" HorizontalAlignment="Center" Height="241" VerticalAlignment="Top" Width="314">
                 <Label x:Name="lblTypeRegister" Content="Тип данных:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,6,0,0"/>
-                <ComboBox x:Name="cbTypeRegister" HorizontalAlignment="Left" VerticalAlignment="Top" Width="137" Margin="104,11,0,0" Height="19" SelectedIndex="0" FontSize="10" SelectionChanged="cbTypeRegister_SelectionChanged" RenderTransformOrigin="0.5,0.5">
+                <ComboBox x:Name="cbTypeRegister" HorizontalAlignment="Left" VerticalAlignment="Top" Width="137" Margin="107,11,0,0" Height="19" SelectedIndex="0" FontSize="10" SelectionChanged="cbTypeRegister_SelectionChanged" RenderTransformOrigin="0.5,0.5">
                     <ComboBox.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -37,8 +37,8 @@
                     <System:String>Coils</System:String>
                     <System:String>Discrete Inputs</System:String>
                 </ComboBox>
-                <Label x:Name="lblIP" Content="IP-адрес:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,41,0,0"/>
-                <TextBox x:Name="edtIP" HorizontalAlignment="Left" Height="18" Margin="106,47,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
+                <Label x:Name="lblIP" Content="IP-адрес:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,39,0,0"/>
+                <TextBox x:Name="edtIP" HorizontalAlignment="Left" Height="18" Margin="106,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
                     <TextBox.Text>
                         <Binding Path="sIPAdr"
                                  UpdateSourceTrigger="PropertyChanged"
@@ -60,8 +60,8 @@
                         </Style>
                     </TextBox.Style>
                 </TextBox>
-                <Label x:Name="lblTCP" Content="TCP-порт:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,81,0,0"/>
-                <TextBox x:Name="edtTCP" HorizontalAlignment="Left" Height="18" Margin="106,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
+                <Label x:Name="lblTCP" Content="TCP-порт:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,78,0,0"/>
+                <TextBox x:Name="edtTCP" HorizontalAlignment="Left" Height="18" Margin="106,83,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
                     <TextBox.Text>
                         <Binding Path="sPortTCP"
                                  UpdateSourceTrigger="PropertyChanged"
@@ -83,7 +83,7 @@
                         </Style>
                     </TextBox.Style>
                 </TextBox>
-                <TextBox x:Name="edtClient" HorizontalAlignment="Left" Height="18" Margin="106,124,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
+                <TextBox x:Name="edtClient" HorizontalAlignment="Left" Height="18" Margin="106,122,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
                     <TextBox.Text>
                         <Binding Path="sClient"
                                  UpdateSourceTrigger="PropertyChanged"
@@ -105,34 +105,50 @@
                         </Style>
                     </TextBox.Style>
                 </TextBox>
-                <Label x:Name="lblCl" Content="Клиенты(макс):" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,119,0,0"/>
-                <Button x:Name="btnUpdateData" Content="Обновить данные" HorizontalAlignment="Center" Margin="0,207,0,0" VerticalAlignment="Top" Width="108" Click="btnUpdate_Click" IsEnabled="False"/>
-                <TextBox x:Name="edtCountNewValues" HorizontalAlignment="Left" Height="18" Margin="173,162,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="70" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}" SelectionChanged="edtCountNewValues_SelectionChanged">
-                    <TextBox.Text>
-                        <Binding Path="sCountNewValues"
-                                 UpdateSourceTrigger="PropertyChanged"
-                                 Mode="TwoWay">
-                            <Binding.ValidationRules>
-                                <validation:NumberInfoValidationRules/>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
+                <Label x:Name="lblCl" Content="Клиенты(макс):" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,117,0,0"/>
+                <Button x:Name="btnUpdateData" Content="Обновить данные" HorizontalAlignment="Center" Margin="0,201,0,0" VerticalAlignment="Top" Width="108" Click="btnUpdate_Click" IsEnabled="False"/>
+                <Label x:Name="lblStartValue" Content="Стартовый адрес:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,154,0,0" Height="26" Width="108"/>
+                <TextBox x:Name="edtStartValue" HorizontalAlignment="Left" Height="18" Margin="114,159,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65" FontSize="10" UndoLimit="65535" Validation.ErrorTemplate="{StaticResource ValidationError}">
                     <TextBox.Style>
-                        <Style TargetType="TextBox">
+                        <Style TargetType="{x:Type TextBox}">
                             <Style.Triggers>
                                 <Trigger Property="Validation.HasError" Value="True">
                                     <Setter Property="ToolTip"
-                                            Value="{Binding RelativeSource={x:Static RelativeSource.Self},
-                                                            Path=(Validation.Errors)/ErrorContent}"/>
+                                    Value="{Binding (Validation.Errors)/ErrorContent, RelativeSource={x:Static RelativeSource.Self}}"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
                     </TextBox.Style>
+                    <Binding Path="sStartValue"
+                         UpdateSourceTrigger="PropertyChanged"
+                         Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <validation:NumberInfoValidationRules/>
+                        </Binding.ValidationRules>
+                    </Binding>
                 </TextBox>
-                <Label x:Name="lblCountNewValues" Content="Количество новых записей:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,156,0,0"/>
+                <TextBox x:Name="edtStep" HorizontalAlignment="Left" Height="18" Margin="229,159,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip"
+                                    Value="{Binding (Validation.Errors)/ErrorContent, RelativeSource={x:Static RelativeSource.Self}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                    <Binding Path="sStep"
+                         UpdateSourceTrigger="PropertyChanged"
+                         Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <validation:NumberInfoValidationRules/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
             </Grid>
         </GroupBox>
-        <DataGrid x:Name="dtGrid" HorizontalAlignment="Left" Height="242" VerticalAlignment="Top" Width="308" Margin="358,20,0,0" SelectedIndex="0" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False">
+        <DataGrid x:Name="dtGrid" HorizontalAlignment="Left" Height="242" VerticalAlignment="Top" Width="308" Margin="369,22,0,0" SelectedIndex="0" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding iAddr}" ClipboardContentBinding="{x:Null}" Header="Address" IsReadOnly="True" MinWidth="100">
                     <DataGridTextColumn.HeaderStyle>
@@ -150,67 +166,29 @@
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <TextBox x:Name="edtStartValue" HorizontalAlignment="Left" Height="18" Margin="422,283,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" FontSize="10" UndoLimit="65535" Validation.ErrorTemplate="{StaticResource ValidationError}">
-            <TextBox.Text>
-                <Binding Path="sStartValue"
-                         UpdateSourceTrigger="PropertyChanged"
-                         Mode="TwoWay">
-                    <Binding.ValidationRules>
-                        <validation:NumberInfoValidationRules/>
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
-            <TextBox.Style>
-                <Style TargetType="TextBox">
-                    <Style.Triggers>
-                        <Trigger Property="Validation.HasError" Value="True">
-                            <Setter Property="ToolTip"
-                                    Value="{Binding RelativeSource={x:Static RelativeSource.Self},
-                                                    Path=(Validation.Errors)/ErrorContent}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
-        <Label x:Name="lblStartValue" Content="Начать с:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="360,278,0,0" Height="26" Width="59"/>
-        <TextBox x:Name="edtStep" HorizontalAlignment="Left" Height="18" Margin="561,283,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
-            <TextBox.Text>
-                <Binding Path="sStep"
-                         UpdateSourceTrigger="PropertyChanged"
-                         Mode="TwoWay">
-                    <Binding.ValidationRules>
-                        <validation:NumberInfoValidationRules/>
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
-            <TextBox.Style>
-                <Style TargetType="TextBox">
-                    <Style.Triggers>
-                        <Trigger Property="Validation.HasError" Value="True">
-                            <Setter Property="ToolTip"
-                                    Value="{Binding RelativeSource={x:Static RelativeSource.Self},
-                                                    Path=(Validation.Errors)/ErrorContent}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
-        <Label x:Name="lblStep" Content="Шаг:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="516,279,0,0" Height="26" Width="35"/>
-        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValue}" Margin="358,20,0,0"  MinColumnWidth="104" CanUserResizeColumns="False" Width="308" MaxWidth="308" Height="242" MaxHeight="242" HorizontalAlignment="Left" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
+        <Label x:Name="lblStep" Content="Шаг:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="222,179,0,0" Height="26" Width="36"/>
+        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValues, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="368,20,0,0"  MinColumnWidth="104" CanUserResizeColumns="False" Width="404" MaxWidth="500" Height="242" MaxHeight="242" HorizontalAlignment="Left" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Рег.адрес" MinWidth="100" Width="*">
+                <DataGridTextColumn Binding="{Binding RegAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Рег.адрес" MinWidth="100" Width="*" IsReadOnly="True">
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Рег.значение" MinWidth="155" Width="*" >
-                        <DataGridTextColumn.HeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.HeaderStyle>
+                <DataGridTextColumn Binding="{Binding RegOldValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Текущее значение" MinWidth="100" Width="*" IsReadOnly="True">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding RegValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Новое значение" MinWidth="100" Width="*">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
