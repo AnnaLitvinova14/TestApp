@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
+
+//БИНДИНГИ
 namespace WpfApp
 {
-    public class DataForConnection: INotifyPropertyChanged //dataContext всего окна
+    public class DataForConnection : INotifyPropertyChanged //dataContext всего окна
     {
         public string sIPAdr { get; set; }
         public string sPortTCP { get; set; }
@@ -24,23 +26,31 @@ namespace WpfApp
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        
-        private ObservableCollection<DataNewRegValues> newRegValues; //переменная, в которой хранятся внесенные изменения
+
+        private ObservableCollection<DataNewRegValues> newRegValues; //переменная(коллекция), в которой хранятся внесенные изменения
         //свойство, отвечающее за (изменение)содержание таблицы
         public ObservableCollection<DataNewRegValues> NewRegValues { get => newRegValues; set { newRegValues = value; RaisePropertyChanged("NewRegValues"); } }
 
+
+        private ObservableCollection<Register> registers; //переменная(коллекция), в которой хранится перечень регистров
+        public ObservableCollection<Register> Registers { get => registers; set { registers = value; } }
+
+        private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
+        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
     }
 
-    public class DataTable
+    public class Register //регистры
     {
-        public DataTable(string iAddr, string iValue)
-        {
-            this.iAddr = iAddr;
-            this.iValue = iValue;
-        }
-        public string iAddr { get; set; }
-        public string iValue { get; set; }
+        private string nameRegister;
+        public string NameRegister { get => nameRegister; set { nameRegister = value;} }
+    }
 
+    public class BoolValue
+    {
+        private string bool_Value;
+        private int id_Value;
+        public string Bool_Value { get => bool_Value; set { bool_Value = value; } }
+        public int ID_Value { get => id_Value; set { id_Value = value; } }
     }
 
     public class DataNewRegValues: INotifyPropertyChanged //dataContex для таблицы

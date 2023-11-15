@@ -23,7 +23,7 @@
         <GroupBox x:Name="grBoxData" Header="Настройки параметров подключения:" Height="258" Margin="24,7,0,0" VerticalAlignment="Top" Width="321" BorderBrush="#FF474A4C" Foreground="Black" OpacityMask="Black" HorizontalAlignment="Left">
             <Grid x:Name="gridSettings" HorizontalAlignment="Center" Height="241" VerticalAlignment="Top" Width="314">
                 <Label x:Name="lblTypeRegister" Content="Тип данных:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,6,0,0"/>
-                <ComboBox x:Name="cbTypeRegister" HorizontalAlignment="Left" VerticalAlignment="Top" Width="137" Margin="107,11,0,0" Height="19" SelectedIndex="0" FontSize="10" SelectionChanged="cbTypeRegister_SelectionChanged" RenderTransformOrigin="0.5,0.5">
+                <ComboBox x:Name="cbTypeRegister" ItemsSource="{Binding Registers, Mode=OneWay}" DisplayMemberPath="NameRegister" HorizontalAlignment="Left" VerticalAlignment="Top" Width="137" Margin="107,11,0,0" Height="19" SelectedIndex="0" FontSize="10" RenderTransformOrigin="0.5,0.5">
                     <ComboBox.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -32,10 +32,6 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </ComboBox.RenderTransform>
-                    <System:String>Holding Registers</System:String>
-                    <System:String>Input Registers</System:String>
-                    <System:String>Coils</System:String>
-                    <System:String>Discrete Inputs</System:String>
                 </ComboBox>
                 <Label x:Name="lblIP" Content="IP-адрес:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,39,0,0"/>
                 <TextBox x:Name="edtIP" HorizontalAlignment="Left" Height="18" Margin="106,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
@@ -148,48 +144,37 @@
                 </TextBox>
             </Grid>
         </GroupBox>
-        <DataGrid x:Name="dtGrid" HorizontalAlignment="Left" Height="242" VerticalAlignment="Top" Width="308" Margin="369,22,0,0" SelectedIndex="0" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding iAddr}" ClipboardContentBinding="{x:Null}" Header="Address" IsReadOnly="True" MinWidth="100">
-                    <DataGridTextColumn.HeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.HeaderStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding iValue}" ClipboardContentBinding="{x:Null}" Header="Value" IsReadOnly="True" Width="*" MinWidth="200">
-                    <DataGridTextColumn.HeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.HeaderStyle>
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
         <Label x:Name="lblStep" Content="Шаг:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="222,179,0,0" Height="26" Width="36"/>
-        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValues, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="368,20,0,0"  MinColumnWidth="104" CanUserResizeColumns="False" Width="404" MaxWidth="500" Height="242" MaxHeight="242" HorizontalAlignment="Left" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
+        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValues, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="368,17,20,0"  MinColumnWidth="104" CanUserResizeColumns="False" MaxWidth="500" Height="248" MaxHeight="256" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding RegAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Рег.адрес" MinWidth="100" Width="*" IsReadOnly="True">
+                <DataGridTextColumn x:Name="rAddress" Binding="{Binding RegAddress, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Header="Рег.адрес" MinWidth="100" Width="*" IsReadOnly="True">
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding RegOldValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Текущее значение" MinWidth="100" Width="*" IsReadOnly="True">
+                <DataGridTextColumn x:Name="rOldValue" Binding="{Binding RegOldValue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Header="Текущее значение" MinWidth="100" Width="*" IsReadOnly="True">
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding RegValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Новое значение" MinWidth="100" Width="*">
+                <DataGridTextColumn x:Name="rValue" Binding="{Binding RegValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Новое значение" MinWidth="100" Width="*">
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
+                <DataGridComboBoxColumn x:Name="cb_rValue" Visibility="Collapsed" ItemsSource="{Binding B_Values}" DisplayMemberPath="Bool_Value" SelectedValuePath="ID_Value"  Header="Новое значение" MinWidth="100" Width="*">
+                    <DataGridComboBoxColumn.HeaderStyle>
+                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGridComboBoxColumn.HeaderStyle>
+                </DataGridComboBoxColumn>
             </DataGrid.Columns>
         </DataGrid>
 

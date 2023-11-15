@@ -18,6 +18,8 @@ using Modbus.Device;
 using System.Net.Sockets;
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using Microsoft.Win32;
+using System.Diagnostics.Eventing.Reader;
 
 namespace WpfApp
 {
@@ -25,9 +27,25 @@ namespace WpfApp
     {        
         ModbusTcpSlave Slave;
         TcpListener Listener;
-        ModbusIpMaster master;
-        public ObservableCollection<DataNewRegValues> collectionRegValues = new ObservableCollection<DataNewRegValues>();
+        //таблица
+        ObservableCollection<DataNewRegValues> collectionRegValues = new ObservableCollection<DataNewRegValues>();
+        //регистры
+        ObservableCollection<Register> collectionRegisters = new ObservableCollection<Register>()
+        {
+            new Register(){ NameRegister = "Holding Registers" },
+            new Register(){ NameRegister = "Input Registers" },
+            new Register(){ NameRegister = "Coils" },
+            new Register(){ NameRegister = "Discrete Inputs" }
+        };
+        //для колонки таблицы с combobox 
+        ObservableCollection<BoolValue> collectionB_Values = new ObservableCollection<BoolValue>()
+        {
+            new BoolValue(){ ID_Value = 1, Bool_Value = "True" },
+            new BoolValue(){ ID_Value = 2,Bool_Value = "False" },
+        };
+        //таймер
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
+        //datacontex всего окна
         DataForConnection objectInfo;
         public MainWindow()
         {
@@ -41,73 +59,89 @@ namespace WpfApp
                 sCountNewValues = Constans.sCountNewValues_default,
                 sStartValue = Constans.sStartValue_default,
                 sStep = Constans.sStep_default,
-                NewRegValues = collectionRegValues //подвязали коллекцию таблицы к свойству графического элемента
+                NewRegValues = collectionRegValues, //подвязали коллекцию (рег+значения) таблицы к свойству графического элемента datagrid
+                Registers = collectionRegisters, //подвязали коллекцию регистров к свойству графического элемента combobox
+                B_Values = collectionB_Values
             }; 
 
             this.DataContext = objectInfo;
+            
+        }
+
+        private void UpdateDataGrid() //обновление данных в таблице
+        {
+            int countRecords = int.Parse(objectInfo.sStep);
+            int iStartValue = int.Parse(objectInfo.sStartValue);
+            ushort uStep = ushort.Parse(objectInfo.sStep);
+
+            collectionRegValues.Clear();
+            
+            for (int i = iStartValue; i < countRecords + iStartValue; i++)
+            {
+                Console.WriteLine("i = " + i.ToString());
+                DataNewRegValues item = new DataNewRegValues(i.ToString(), RegisterType(i), null);
+                collectionRegValues.Add(item);
+            }
 
         }
 
-
-        private void UpdateDataGrid()
+        private void VisibilityColumns(int flag)
         {
-            /* int length = int.Parse(edtStep.Text);
-             List<DataTable> dTable = new List<DataTable>(length);
-             for (int i = int.Parse(edtStartValue.Text); i < length + int.Parse(edtStartValue.Text); i++)
-             {
-                 dTable.Add(new DataTable(i.ToString(), RegisterType(i, 1)));
-             }
-             dtGrid.ItemsSource = dTable; */
-
-            int length = int.Parse(edtStep.Text); //objectInfo.sStep
-            List<DataTable> dTable = new List<DataTable>(length);
-            for (int i = int.Parse(edtStartValue.Text); i < length + int.Parse(edtStartValue.Text); i++)
+            if (flag == 0) //Holding
             {
-                dTable.Add(new DataTable(i.ToString(), RegisterType(i, 1)));
+                cb_rValue.Visibility = Visibility.Collapsed;
+                rValue.Visibility = Visibility.Visible;
             }
-            dtGrid.ItemsSource = dTable;
-
+            else if (flag == 1) //Coils
+            {
+                cb_rValue.Visibility = Visibility.Visible;
+                rValue.Visibility = Visibility.Collapsed;
+            }
+            else if (flag == 2) //Input, Discrete
+            {
+                cb_rValue.Visibility = Visibility.Collapsed;
+                rValue.Visibility = Visibility.Collapsed;
+            }
+            
         }
-
-        private string RegisterType(int rAddr, int flag)
-        {
-
-            // 0 - H; 1 - I; 2 - C; 3 - DI 
-
-          /*  else if (cbTypeRegister.SelectedIndex == 1)
+        private string RegisterType(int rAddr)//назначение регистра и получение значений 
+        {            
+            // 0 - H; 1 - I; 2 - C; 3 - DI
+            string Result = "error";
+            int flagVisibility;
+            if (objectInfo != null)
             {
-                var register = Slave.DataStore.InputRegisters; 
-                ushort rValue = ushort.Parse(edtRegValue.Text);
-                if (edtRegValue.Text != "") rValue = ushort.Parse(edtRegValue.Text);
-                if (flag == 0)
-                    register[rAddr] = rValue;
-                return register[rAddr].ToString();
-            }
-            else if (cbTypeRegister.SelectedIndex == 2)
-            {
-                var register = Slave.DataStore.CoilDiscretes;
-                bool rValue = false;
-                if (edtRegValue.Text == "1" || edtRegValue.Text == "true")
+                if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.H_Register)
                 {
-                    rValue = true;
+                    flagVisibility = 0;
+                    VisibilityColumns(flagVisibility);
+                    var register = Slave.DataStore.HoldingRegisters;
+                    Result = register[rAddr].ToString();
                 }
-                if (flag == 0)
-                    register[rAddr] = rValue;
-                return register[rAddr].ToString();
-            }
-            else if (cbTypeRegister.SelectedIndex == 3)
-            {
-                var register = Slave.DataStore.InputDiscretes;
-                bool rValue = false;
-                if (edtRegValue.Text == "1" || edtRegValue.Text == "true")
+                else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.I_Register)
                 {
-                    rValue = true;
+                    flagVisibility = 2;
+                    VisibilityColumns(flagVisibility);
+                    var register = Slave.DataStore.InputRegisters;
+                    Result = register[rAddr].ToString();
                 }
-                if (flag == 0)
-                    register[rAddr] = rValue;
-                return register[rAddr].ToString();
-            }*/
-            return "error";
+                else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.C_Register)
+                {
+                    flagVisibility = 1;
+                    VisibilityColumns(flagVisibility);
+                    var register = Slave.DataStore.CoilDiscretes;
+                    Result = register[rAddr].ToString();
+                }
+                else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.DI_Register)
+                {
+                    flagVisibility = 2;
+                    VisibilityColumns(flagVisibility);
+                    var register = Slave.DataStore.InputDiscretes;
+                    Result = register[rAddr].ToString();
+                }
+                return Result;
+            }
+            else return Result;
         }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
@@ -117,8 +151,7 @@ namespace WpfApp
                 btnStart.Content = "Остановить";
                 Listener = new TcpListener(IPAddress.Parse(objectInfo.sIPAdr), int.Parse(objectInfo.sPortTCP));
                 Listener.Start();
-                Slave = ModbusTcpSlave.CreateTcp(Constans.slaveID, Listener);
-                master = ModbusIpMaster.CreateIp((Modbus.IO.IStreamResource)Slave.Masters[0].Client);
+                Slave = ModbusTcpSlave.CreateTcp(Constans.slaveID, Listener);       
                 Slave.Listen();
                 
                 btnUpdateData.IsEnabled = true;
@@ -140,18 +173,12 @@ namespace WpfApp
             }
         }
 
-        private void btnUpdate_Click(object sender, RoutedEventArgs e)
+        private void btnUpdate_Click(object sender, RoutedEventArgs e)// "Обновить данные"
         {
-
-            //  int rAddr = int.Parse(edtRegAddr.Text);
-
-            //  RegisterType(rAddr, 0);
-            dtRegValues.IsEnabled = false;
-            dtRegValues.Visibility = Visibility.Collapsed;
             UpdateDataGrid();
         }
 
-        private void timerTick(object sender, EventArgs e)
+        private void timerTick(object sender, EventArgs e)//таймер, сканирующий новые подключения
         {
             int iClient = int.Parse(edtClient.Text);
             
@@ -168,68 +195,5 @@ namespace WpfApp
             UpdateDataGrid();
         }
 
-
-        private void cbTypeRegister_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // 0 - H; 1 - I; 2 - C; 3 - DI 
-            if (objectInfo != null)
-            {
-                int countRecords = int.Parse(objectInfo.sStep);
-                int iStartValue = int.Parse(objectInfo.sStartValue);
-                ushort uStartValue = ushort.Parse(objectInfo.sStartValue);
-                ushort uStep = ushort.Parse(objectInfo.sStep);
-
-                if (cbTypeRegister.SelectedIndex == 0)
-                {
-                    //вывести на редактирование рег.адрес и текущие значения  
-                    ushort[] registersHolding = master.ReadHoldingRegisters(Constans.slaveID, uStartValue, uStep);
-
-                    for (int i = iStartValue; i < countRecords + iStartValue; i++)
-                    {
-                        DataNewRegValues item = new DataNewRegValues(i.ToString(), registersHolding[i].ToString(), "");
-                        collectionRegValues.Add(item);
-                    }
-                }
-                else if (cbTypeRegister.SelectedIndex == 1)
-                {
-                    //12345
-                }
-                else if (cbTypeRegister.SelectedIndex == 2)
-                {
-                    bool[] registersCoil = master.ReadCoils(Constans.slaveID, uStartValue, uStep);
-
-                    for (int i = iStartValue; i < countRecords + iStartValue; i++)
-                    {
-                        DataNewRegValues item = new DataNewRegValues(i.ToString(), registersCoil[i].ToString(), "");
-                        collectionRegValues.Add(item);
-                    }
-
-                }
-                else if (cbTypeRegister.SelectedIndex == 3)
-                {
-                    //true
-                }
-            }
-        }
-
-        private void edtCountNewValues_SelectionChanged(object sender, RoutedEventArgs e)
-        {
-            
-            dtRegValues.IsEnabled = true;
-            dtRegValues.Visibility = Visibility.Visible;
-            /*
-            //генерация нужного количества строк
-            int countRowNewValues = 0;
-            string s = "";
-            collectionRegValues.Clear(); 
-            if (edtCountNewValues.Text != "" && int.TryParse(edtCountNewValues.Text, out countRowNewValues))
-            {               
-                for (int i = 0; i < countRowNewValues; i++)
-                {
-                    DataNewRegValues item = new DataNewRegValues(s,s);
-                    collectionRegValues.Add(item);
-                }
-            }*/
-        }
     }
 }
