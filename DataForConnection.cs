@@ -27,14 +27,16 @@ namespace WpfApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        //новые значения
         private ObservableCollection<DataNewRegValues> newRegValues; //переменная(коллекция), в которой хранятся внесенные изменения
         //свойство, отвечающее за (изменение)содержание таблицы
         public ObservableCollection<DataNewRegValues> NewRegValues { get => newRegValues; set { newRegValues = value; RaisePropertyChanged("NewRegValues"); } }
 
-
+        //регистры
         private ObservableCollection<Register> registers; //переменная(коллекция), в которой хранится перечень регистров
         public ObservableCollection<Register> Registers { get => registers; set { registers = value; } }
 
+        //комбобокс таблицы 
         private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
         public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
     }
