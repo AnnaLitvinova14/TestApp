@@ -36,9 +36,6 @@ namespace WpfApp
         private ObservableCollection<Register> registers; //переменная(коллекция), в которой хранится перечень регистров
         public ObservableCollection<Register> Registers { get => registers; set { registers = value; } }
 
-        //комбобокс таблицы 
-        private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
-        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
     }
 
     public class Register //регистры
@@ -71,6 +68,9 @@ namespace WpfApp
         public string RegOldValue { get => regOldValue; set { regValue = value; RaisePropertyChanged("RegOldValue"); } }
         public string RegValue { get => regValue; set { regValue = value; RaisePropertyChanged("RegValue"); } }
 
+        //комбобокс таблицы 
+        private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
+        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void RaisePropertyChanged(string propertyName)

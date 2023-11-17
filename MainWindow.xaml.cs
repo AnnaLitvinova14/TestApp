@@ -56,12 +56,10 @@ namespace WpfApp
                 sIPAdr = Constans.sIP_default,
                 sPortTCP = Constans.sTCP_default,
                 sClient = Constans.sClient_default,
-                sCountNewValues = Constans.sCountNewValues_default,
                 sStartValue = Constans.sStartValue_default,
                 sStep = Constans.sStep_default,
                 NewRegValues = collectionRegValues, //подвязали коллекцию (рег+значения) таблицы к свойству графического элемента datagrid
                 Registers = collectionRegisters, //подвязали коллекцию регистров к свойству графического элемента combobox
-                B_Values = collectionB_Values
             }; 
 
             this.DataContext = objectInfo;
