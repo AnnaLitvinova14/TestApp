@@ -47,9 +47,7 @@ namespace WpfApp
     public class BoolValue
     {
         private string bool_Value;
-        private int id_Value;
         public string Bool_Value { get => bool_Value; set { bool_Value = value; } }
-        public int ID_Value { get => id_Value; set { id_Value = value; } }
     }
 
     public class DataNewRegValues: INotifyPropertyChanged //dataContex для таблицы
@@ -58,25 +56,27 @@ namespace WpfApp
         private string regAddress;
         private string regOldValue;
         private string regValue;
-        public DataNewRegValues(string regAddress, string regOldValue, string regValue)
+        public DataNewRegValues(string regAddress, string regOldValue, string regValue = null, ObservableCollection<BoolValue> B_Values = null)
         {
             this.RegAddress = regAddress;
             this.regOldValue = regOldValue;
             this.RegValue = regValue;
+            this.B_Values = b_Values;
         }
         public string RegAddress { get => regAddress; set { regAddress = value; RaisePropertyChanged("RegAddress"); } }
         public string RegOldValue { get => regOldValue; set { regValue = value; RaisePropertyChanged("RegOldValue"); } }
         public string RegValue { get => regValue; set { regValue = value; RaisePropertyChanged("RegValue"); } }
-
-        //комбобокс таблицы 
-        private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
-        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void RaisePropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        //комбобокс таблицы 
+        private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
+        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
+
 
     }
 

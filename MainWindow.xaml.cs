@@ -40,13 +40,14 @@ namespace WpfApp
         //для колонки таблицы с combobox 
         ObservableCollection<BoolValue> collectionB_Values = new ObservableCollection<BoolValue>()
         {
-            new BoolValue(){ ID_Value = 1, Bool_Value = "True" },
-            new BoolValue(){ ID_Value = 2,Bool_Value = "False" },
+            new BoolValue(){ Bool_Value = "True" },
+            new BoolValue(){ Bool_Value = "False" }
         };
         //таймер
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
         //datacontex всего окна
         DataForConnection objectInfo;
+        int flagVisibility;
         public MainWindow()
         {
             InitializeComponent();
@@ -59,7 +60,7 @@ namespace WpfApp
                 sStartValue = Constans.sStartValue_default,
                 sStep = Constans.sStep_default,
                 NewRegValues = collectionRegValues, //подвязали коллекцию (рег+значения) таблицы к свойству графического элемента datagrid
-                Registers = collectionRegisters, //подвязали коллекцию регистров к свойству графического элемента combobox
+                Registers = collectionRegisters //подвязали коллекцию регистров к свойству графического элемента combobox
             }; 
 
             this.DataContext = objectInfo;
@@ -70,14 +71,26 @@ namespace WpfApp
         {
             int countRecords = int.Parse(objectInfo.sStep);
             int iStartValue = int.Parse(objectInfo.sStartValue);
-            ushort uStep = ushort.Parse(objectInfo.sStep);
-
+            DataNewRegValues item;
+            
             collectionRegValues.Clear();
             
+           /* for (int j = 0; j < collectionB_Values.Count; j++)
+            {
+                Console.WriteLine("c_v = " + collectionB_Values[j].Bool_Value.ToString());
+            }*/
+
             for (int i = iStartValue; i < countRecords + iStartValue; i++)
             {
-                Console.WriteLine("i = " + i.ToString());
-                DataNewRegValues item = new DataNewRegValues(i.ToString(), RegisterType(i), null);
+                //Console.WriteLine("i = " + i.ToString());
+                if (flagVisibility == 1)
+                {
+                    item = new DataNewRegValues(i.ToString(), RegisterType(i), null, collectionB_Values);
+                }
+                else
+                {
+                    item = new DataNewRegValues(i.ToString(), RegisterType(i), null);
+                }                
                 collectionRegValues.Add(item);
             }
 
@@ -106,7 +119,6 @@ namespace WpfApp
         {            
             // 0 - H; 1 - I; 2 - C; 3 - DI
             string Result = "error";
-            int flagVisibility;
             if (objectInfo != null)
             {
                 if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.H_Register)
