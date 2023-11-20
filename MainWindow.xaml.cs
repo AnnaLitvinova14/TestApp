@@ -20,13 +20,18 @@ using System.Collections.ObjectModel;
 using System.Net.Http;
 using Microsoft.Win32;
 using System.Diagnostics.Eventing.Reader;
+using Modbus.Data;
 
 namespace WpfApp
 {
     public partial class MainWindow : Window
-    {        
+    {
         ModbusTcpSlave Slave;
         TcpListener Listener;
+        ModbusDataCollection<ushort> uRegister;
+        ModbusDataCollection<bool> bRegister;
+        DataNewRegValues item;
+        Dictionary<int, string> updateRegValues = new Dictionary<int, string>();
         //таблица
         ObservableCollection<DataNewRegValues> collectionRegValues = new ObservableCollection<DataNewRegValues>();
         //регистры
@@ -61,35 +66,53 @@ namespace WpfApp
                 sStep = Constans.sStep_default,
                 NewRegValues = collectionRegValues, //подвязали коллекцию (рег+значения) таблицы к свойству графического элемента datagrid
                 Registers = collectionRegisters //подвязали коллекцию регистров к свойству графического элемента combobox
-            }; 
+            };
 
             this.DataContext = objectInfo;
-            
         }
 
         private void UpdateDataGrid() //обновление данных в таблице
         {
             int countRecords = int.Parse(objectInfo.sStep);
             int iStartValue = int.Parse(objectInfo.sStartValue);
-            DataNewRegValues item;
-            
-            collectionRegValues.Clear();
-            
-           /* for (int j = 0; j < collectionB_Values.Count; j++)
-            {
-                Console.WriteLine("c_v = " + collectionB_Values[j].Bool_Value.ToString());
-            }*/
 
-            for (int i = iStartValue; i < countRecords + iStartValue; i++)
+            //чтение новых введенных в таблицу значений в словарик перед очисткой datacontex таблицы
+            updateRegValues.Clear();
+            if (objectInfo.NewRegValues.Count > 0)
             {
-                //Console.WriteLine("i = " + i.ToString());
+                Console.WriteLine("count = " + objectInfo.NewRegValues.Count.ToString());
+                for (int j = 0; j < objectInfo.NewRegValues.Count; j++)
+                {
+                    updateRegValues.Add(int.Parse(objectInfo.NewRegValues[j].RegAddress), objectInfo.NewRegValues[j].RegValue);
+                    Console.WriteLine("j = " + j.ToString()
+                        + "; newRV.RegAddress = " + objectInfo.NewRegValues[j].RegAddress
+                        + "; newRV.RegValue = " + objectInfo.NewRegValues[j].RegValue);
+                }
+            }
+
+            collectionRegValues.Clear();
+            for (int i = iStartValue; i < countRecords + iStartValue; i++)
+            {           
                 if (flagVisibility == 1)
                 {
-                    item = new DataNewRegValues(i.ToString(), RegisterType(i), null, collectionB_Values);
+                    /*if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue)
+                        item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue), null, collectionB_Values)
+                    else*/
+
                 }
                 else
                 {
-                    item = new DataNewRegValues(i.ToString(), RegisterType(i), null);
+                    if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue))
+                    {
+                        Console.WriteLine("i = " + i.ToString() + "; sRegValue = " + sRegValue);
+                        item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue), null);
+                    }
+                        
+                    else
+                    {
+                        item = new DataNewRegValues(i.ToString(), RegisterType(i), null);
+                    }
+                        
                 }                
                 collectionRegValues.Add(item);
             }
@@ -115,39 +138,42 @@ namespace WpfApp
             }
             
         }
-        private string RegisterType(int rAddr)//назначение регистра и получение значений 
+        private string RegisterType(int rAddr, string rValue = null)//назначение регистра и получение значений 
         {            
             // 0 - H; 1 - I; 2 - C; 3 - DI
             string Result = "error";
+
             if (objectInfo != null)
             {
                 if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.H_Register)
                 {
                     flagVisibility = 0;
                     VisibilityColumns(flagVisibility);
-                    var register = Slave.DataStore.HoldingRegisters;
-                    Result = register[rAddr].ToString();
+                    uRegister = Slave.DataStore.HoldingRegisters;
+                    if (rValue != null) uRegister[rAddr] = ushort.Parse(rValue);
+                    
+                    Result = uRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.I_Register)
                 {
                     flagVisibility = 2;
                     VisibilityColumns(flagVisibility);
-                    var register = Slave.DataStore.InputRegisters;
-                    Result = register[rAddr].ToString();
+                    uRegister = Slave.DataStore.InputRegisters;
+                    Result = uRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.C_Register)
                 {
                     flagVisibility = 1;
                     VisibilityColumns(flagVisibility);
-                    var register = Slave.DataStore.CoilDiscretes;
-                    Result = register[rAddr].ToString();
+                    bRegister = Slave.DataStore.CoilDiscretes;
+                    Result = bRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.DI_Register)
                 {
                     flagVisibility = 2;
                     VisibilityColumns(flagVisibility);
-                    var register = Slave.DataStore.InputDiscretes;
-                    Result = register[rAddr].ToString();
+                    bRegister = Slave.DataStore.InputDiscretes;
+                    Result = bRegister[rAddr].ToString();
                 }
                 return Result;
             }
@@ -168,7 +194,7 @@ namespace WpfApp
 
                 lblStatus.Content = "Статус: В работе";
                 timer.Tick += new EventHandler(timerTick);
-                timer.Interval = new TimeSpan(0, 0, 2);
+                timer.Interval = new TimeSpan(0, 0, 60);
                 timer.Start();
             }
             else if (btnStart.Content.ToString() == "Остановить")
@@ -185,7 +211,11 @@ namespace WpfApp
 
         private void btnUpdate_Click(object sender, RoutedEventArgs e)// "Обновить данные"
         {
+
+//            Console.WriteLine("Count_1 = " + objectInfo.NewRegValues.Count.ToString());
             UpdateDataGrid();
+  //          Console.WriteLine("Count_2 = " + objectInfo.NewRegValues.Count.ToString());
+
         }
 
         private void timerTick(object sender, EventArgs e)//таймер, сканирующий новые подключения

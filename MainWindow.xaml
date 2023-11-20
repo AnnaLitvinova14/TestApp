@@ -168,7 +168,7 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridComboBoxColumn x:Name="cb_rValue" Visibility="Collapsed" ItemsSource="{Binding B_Values, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Новое значение" MinWidth="100" Width="*">
+                <DataGridComboBoxColumn x:Name="cb_rValue" Visibility="Collapsed" ItemsSource="{Binding B_Values, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedItemBinding="{Binding Bool_Value}" Header="Новое значение" MinWidth="100" Width="*">
                     <DataGridComboBoxColumn.HeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />

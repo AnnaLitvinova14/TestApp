@@ -64,7 +64,7 @@ namespace WpfApp
             this.B_Values = b_Values;
         }
         public string RegAddress { get => regAddress; set { regAddress = value; RaisePropertyChanged("RegAddress"); } }
-        public string RegOldValue { get => regOldValue; set { regValue = value; RaisePropertyChanged("RegOldValue"); } }
+        public string RegOldValue { get => regOldValue; set { regOldValue = value; RaisePropertyChanged("RegOldValue"); } }
         public string RegValue { get => regValue; set { regValue = value; RaisePropertyChanged("RegValue"); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
