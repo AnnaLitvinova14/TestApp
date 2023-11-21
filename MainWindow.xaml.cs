@@ -26,14 +26,20 @@ namespace WpfApp
 {
     public partial class MainWindow : Window
     {
-        ModbusTcpSlave Slave;
+        ModbusTcpSlave Slave;//server
         TcpListener Listener;
-        ModbusDataCollection<ushort> uRegister;
-        ModbusDataCollection<bool> bRegister;
-        DataNewRegValues item;
-        Dictionary<int, string> updateRegValues = new Dictionary<int, string>();
-        //таблица
+
+        ModbusDataCollection<ushort> uRegister; //регистр типа ushort
+        ModbusDataCollection<bool> bRegister; //регистр типа bool
+
+        DataNewRegValues item; //запись; относится к таблице
+
+        //словарик для записи внесенных в таблицу значений со стороны сервера
+        Dictionary<int, string> updateRegValues = new Dictionary<int, string>(); 
+        
+        //данные из таблицы
         ObservableCollection<DataNewRegValues> collectionRegValues = new ObservableCollection<DataNewRegValues>();
+        
         //регистры
         ObservableCollection<Register> collectionRegisters = new ObservableCollection<Register>()
         {
@@ -42,22 +48,24 @@ namespace WpfApp
             new Register(){ NameRegister = "Coils" },
             new Register(){ NameRegister = "Discrete Inputs" }
         };
+        
         //для колонки таблицы с combobox 
         ObservableCollection<BoolValue> collectionB_Values = new ObservableCollection<BoolValue>()
         {
             new BoolValue(){ Bool_Value = "True" },
             new BoolValue(){ Bool_Value = "False" }
         };
+        
         //таймер
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
-        //datacontex всего окна
-        DataForConnection objectInfo;
-        int flagVisibility;
+     
+        DataForConnection objectInfo;//datacontex всего окна
+        int flagVisibility;//флаг для видимости в таблице колонки "Новое значение"
         public MainWindow()
         {
             InitializeComponent();
 
-            objectInfo = new DataForConnection
+            objectInfo = new DataForConnection //подвязываем значения по умолчанию к UI
             {
                 sIPAdr = Constans.sIP_default,
                 sPortTCP = Constans.sTCP_default,
@@ -68,58 +76,55 @@ namespace WpfApp
                 Registers = collectionRegisters //подвязали коллекцию регистров к свойству графического элемента combobox
             };
 
-            this.DataContext = objectInfo;
+            this.DataContext = objectInfo;//привязка dataContext всего окна
         }
 
         private void UpdateDataGrid() //обновление данных в таблице
         {
-            int countRecords = int.Parse(objectInfo.sStep);
-            int iStartValue = int.Parse(objectInfo.sStartValue);
+            int countRecords = int.Parse(objectInfo.sStep); //шаг записей
+            int iStartValue = int.Parse(objectInfo.sStartValue); //с какой записи стартуем
 
-            //чтение новых введенных в таблицу значений в словарик перед очисткой datacontex таблицы
+            //чтение новых, введенных в таблицу, значений в словарик перед очисткой таблицы
             updateRegValues.Clear();
             if (objectInfo.NewRegValues.Count > 0)
-            {
-                Console.WriteLine("count = " + objectInfo.NewRegValues.Count.ToString());
+            {                
                 for (int j = 0; j < objectInfo.NewRegValues.Count; j++)
                 {
                     updateRegValues.Add(int.Parse(objectInfo.NewRegValues[j].RegAddress), objectInfo.NewRegValues[j].RegValue);
-                    Console.WriteLine("j = " + j.ToString()
-                        + "; newRV.RegAddress = " + objectInfo.NewRegValues[j].RegAddress
-                        + "; newRV.RegValue = " + objectInfo.NewRegValues[j].RegValue);
                 }
             }
 
+            //обновление таблицы
             collectionRegValues.Clear();
             for (int i = iStartValue; i < countRecords + iStartValue; i++)
             {           
-                if (flagVisibility == 1)
+                if (flagVisibility == 1) //если = 1, отобразить столбец с комбобокс
                 {
+                    Console.WriteLine("flagVisibility == 1");
                     /*if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue)
                         item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue), null, collectionB_Values)
                     else*/
 
                 }
-                else
+                else //отобразить редактируемый столбец без комбобокс
                 {
+                    Console.WriteLine("flagVisibility == " + flagVisibility.ToString());
+                    //если есть измененные значения и по адресу можно получить новое значение
                     if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue))
                     {
-                        Console.WriteLine("i = " + i.ToString() + "; sRegValue = " + sRegValue);
-                        item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue), null);
-                    }
-                        
+                        item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue)); //запись в таблицу с новыми значениями
+                    }    
                     else
                     {
-                        item = new DataNewRegValues(i.ToString(), RegisterType(i), null);
-                    }
-                        
+                        item = new DataNewRegValues(i.ToString(), RegisterType(i));//запись в таблицу старых значений
+                    }                        
                 }                
                 collectionRegValues.Add(item);
             }
 
         }
 
-        private void VisibilityColumns(int flag)
+        private void VisibilityColumns(int flag) //видимость в таблице столбца "Новое значение" в зависимости от выбранного регистра
         {
             if (flag == 0) //Holding
             {
@@ -150,7 +155,9 @@ namespace WpfApp
                     flagVisibility = 0;
                     VisibilityColumns(flagVisibility);
                     uRegister = Slave.DataStore.HoldingRegisters;
-                    if (rValue != null) uRegister[rAddr] = ushort.Parse(rValue);
+                    
+                    if (rValue != null) //если есть новое значение, то присваиваем его регистру по нужному адресу
+                        uRegister[rAddr] = ushort.Parse(rValue);
                     
                     Result = uRegister[rAddr].ToString();
                 }
@@ -159,6 +166,7 @@ namespace WpfApp
                     flagVisibility = 2;
                     VisibilityColumns(flagVisibility);
                     uRegister = Slave.DataStore.InputRegisters;
+
                     Result = uRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.C_Register)
@@ -166,6 +174,10 @@ namespace WpfApp
                     flagVisibility = 1;
                     VisibilityColumns(flagVisibility);
                     bRegister = Slave.DataStore.CoilDiscretes;
+
+                    if (rValue != null) //если есть новое значение, то присваиваем его регистру по нужному адресу
+                        bRegister[rAddr] = bool.Parse(rValue);
+
                     Result = bRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.DI_Register)
@@ -180,9 +192,9 @@ namespace WpfApp
             else return Result;
         }
 
-        private void btnStart_Click(object sender, RoutedEventArgs e)
+        private void btnStart_Click(object sender, RoutedEventArgs e)//нажатие на кнопку "Запустить"/"Остановить"
         {
-            if (btnStart.Content.ToString() == "Запустить")
+            if (btnStart.Content.ToString() == "Запустить")//нажатие на кнопку "Запустить"
             {
                 btnStart.Content = "Остановить";
                 Listener = new TcpListener(IPAddress.Parse(objectInfo.sIPAdr), int.Parse(objectInfo.sPortTCP));
@@ -194,10 +206,10 @@ namespace WpfApp
 
                 lblStatus.Content = "Статус: В работе";
                 timer.Tick += new EventHandler(timerTick);
-                timer.Interval = new TimeSpan(0, 0, 60);
+                timer.Interval = new TimeSpan(0, 0, 5);
                 timer.Start();
             }
-            else if (btnStart.Content.ToString() == "Остановить")
+            else if (btnStart.Content.ToString() == "Остановить")//нажатие на кнопку "Остановить"
             {
                 btnStart.Content = "Запустить";
                 btnUpdateData.IsEnabled = false;
@@ -209,13 +221,9 @@ namespace WpfApp
             }
         }
 
-        private void btnUpdate_Click(object sender, RoutedEventArgs e)// "Обновить данные"
+        private void btnUpdate_Click(object sender, RoutedEventArgs e)//нажатие на кнопку "Обновить данные"
         {
-
-//            Console.WriteLine("Count_1 = " + objectInfo.NewRegValues.Count.ToString());
             UpdateDataGrid();
-  //          Console.WriteLine("Count_2 = " + objectInfo.NewRegValues.Count.ToString());
-
         }
 
         private void timerTick(object sender, EventArgs e)//таймер, сканирующий новые подключения
@@ -231,7 +239,6 @@ namespace WpfApp
                     Slave.Masters[i].Client.Disconnect(false);
                 }
             }
-
             UpdateDataGrid();
         }
 

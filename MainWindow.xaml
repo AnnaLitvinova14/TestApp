@@ -161,7 +161,14 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="rValue" Binding="{Binding RegValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Новое значение" MinWidth="100" Width="*">
+                <DataGridTextColumn x:Name="rValue" Header="Новое значение" MinWidth="100" Width="*">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="RegValue" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <validation:NumberInfoValidationRules/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </DataGridTextColumn.Binding>
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />

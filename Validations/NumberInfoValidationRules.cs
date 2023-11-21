@@ -13,7 +13,7 @@ namespace WpfApp.Validations
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            int minValue = 0;
+            int minValue = 1;
             int maxValue = 65535;
             //если числовое значение введено
             if (int.TryParse(value.ToString(), out int intValue))
