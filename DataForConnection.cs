@@ -17,7 +17,6 @@ namespace WpfApp
         public string sIPAdr { get; set; }
         public string sPortTCP { get; set; }
         public string sClient { get; set; }
-        public string sCountNewValues { get; set; }
         public string sStartValue { get; set; }
         public string sStep { get; set; }
 
@@ -44,7 +43,7 @@ namespace WpfApp
         public string NameRegister { get => nameRegister; set { nameRegister = value;} }
     }
 
-    public class BoolValue
+    public class BoolValue //значения комбобокса внутри таблицы
     {
         private string bool_Value;
         public string Bool_Value { get => bool_Value; set { bool_Value = value; } }
@@ -55,17 +54,21 @@ namespace WpfApp
         //привязка к полям таблицы
         private string regAddress;
         private string regOldValue;
-        private string regValue;
-        public DataNewRegValues(string regAddress, string regOldValue, string regValue = null, ObservableCollection<BoolValue> B_Values = null)
+        private string regValue; //новое значение
+        private int cbSelectItem;
+
+        //параметры новой записи таблицы
+        public DataNewRegValues(string regAddress, string regOldValue, ObservableCollection<BoolValue> b_Values, int cbSelectItem)
         {
-            this.RegAddress = regAddress;
-            this.regOldValue = regOldValue;
-            this.RegValue = regValue;
-            this.B_Values = b_Values;
+            this.RegAddress = regAddress; //адрес
+            this.regOldValue = regOldValue; //текущее значение
+            this.B_Values = b_Values; //значения комбобокса
+            this.CbSelectItem = cbSelectItem; //выбранный индекс комбобокса
         }
         public string RegAddress { get => regAddress; set { regAddress = value; RaisePropertyChanged("RegAddress"); } }
         public string RegOldValue { get => regOldValue; set { regOldValue = value; RaisePropertyChanged("RegOldValue"); } }
         public string RegValue { get => regValue; set { regValue = value; RaisePropertyChanged("RegValue"); } }
+        public int CbSelectItem { get => cbSelectItem; set { cbSelectItem = value; RaisePropertyChanged("CbSelectItem"); } }        
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void RaisePropertyChanged(string propertyName)
@@ -73,10 +76,12 @@ namespace WpfApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        //комбобокс таблицы 
-        private ObservableCollection<BoolValue> b_Values; //переменная(коллекция), в которой хранится перечень bool значений для combobox
-        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
 
+        //СТАРТ комбобокс таблицы
+        //переменная(коллекция), в которой хранится перечень bool значений для combobox
+        private ObservableCollection<BoolValue> b_Values;
+        public ObservableCollection<BoolValue> B_Values { get => b_Values; set { b_Values = value; } }
+        //КОНЕЦ комбобокс таблицы
 
     }
 

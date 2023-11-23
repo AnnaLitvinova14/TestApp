@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp"
         xmlns:validation="clr-namespace:WpfApp.Validations"
+
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Name="FormTestApp" x:Class="WpfApp.MainWindow"
         mc:Ignorable="d"
         Title="Тестовое задание" Height="351.072" Width="785" ResizeMode="NoResize">
@@ -18,12 +19,10 @@
         </ControlTemplate>
     </Window.Resources>
     <Grid x:Name="MainGrid">
-        <Label x:Name="lblStatus" Content="Статус: -" HorizontalAlignment="Left" Margin="22,279,0,0" VerticalAlignment="Top" Height="32" Width="178"/>
-        <Button x:Name="btnStart" Content="Запустить" HorizontalAlignment="Left" Margin="246,282,0,0" VerticalAlignment="Top" Width="75" Click="btnStart_Click" Height="19"/>
-        <GroupBox x:Name="grBoxData" Header="Настройки параметров подключения:" Height="258" Margin="24,7,0,0" VerticalAlignment="Top" Width="321" BorderBrush="#FF474A4C" Foreground="Black" OpacityMask="Black" HorizontalAlignment="Left">
-            <Grid x:Name="gridSettings" HorizontalAlignment="Center" Height="241" VerticalAlignment="Top" Width="314">
+        <GroupBox x:Name="grBoxData" Header="Настройки параметров подключения:" Height="214" Margin="24,7,0,0" VerticalAlignment="Top" Width="321" BorderBrush="#FF474A4C" Foreground="Black" OpacityMask="Black" HorizontalAlignment="Left">
+            <Grid x:Name="gridSettings" HorizontalAlignment="Center" Height="195" VerticalAlignment="Top" Width="314">
                 <Label x:Name="lblTypeRegister" Content="Тип данных:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,6,0,0"/>
-                <ComboBox x:Name="cbTypeRegister" ItemsSource="{Binding Registers, Mode=OneWay}" DisplayMemberPath="NameRegister" HorizontalAlignment="Left" VerticalAlignment="Top" Width="137" Margin="107,11,0,0" Height="19" SelectedIndex="0" FontSize="10" RenderTransformOrigin="0.5,0.5">
+                <ComboBox x:Name="cbTypeRegister" ItemsSource="{Binding Registers, Mode=OneWay}" DisplayMemberPath="NameRegister" HorizontalAlignment="Left" VerticalAlignment="Top" Width="137" Margin="107,11,0,0" Height="19" SelectedIndex="0" FontSize="10" RenderTransformOrigin="0.5,0.5" SelectionChanged="cbTypeRegister_SelectionChanged">
                     <ComboBox.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -102,50 +101,11 @@
                     </TextBox.Style>
                 </TextBox>
                 <Label x:Name="lblCl" Content="Клиенты(макс):" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,117,0,0"/>
-                <Button x:Name="btnUpdateData" Content="Обновить данные" HorizontalAlignment="Center" Margin="0,201,0,0" VerticalAlignment="Top" Width="108" Click="btnUpdate_Click" IsEnabled="False"/>
-                <Label x:Name="lblStartValue" Content="Стартовый адрес:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,154,0,0" Height="26" Width="108"/>
-                <TextBox x:Name="edtStartValue" HorizontalAlignment="Left" Height="18" Margin="114,159,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65" FontSize="10" UndoLimit="65535" Validation.ErrorTemplate="{StaticResource ValidationError}">
-                    <TextBox.Style>
-                        <Style TargetType="{x:Type TextBox}">
-                            <Style.Triggers>
-                                <Trigger Property="Validation.HasError" Value="True">
-                                    <Setter Property="ToolTip"
-                                    Value="{Binding (Validation.Errors)/ErrorContent, RelativeSource={x:Static RelativeSource.Self}}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                    <Binding Path="sStartValue"
-                         UpdateSourceTrigger="PropertyChanged"
-                         Mode="TwoWay">
-                        <Binding.ValidationRules>
-                            <validation:NumberInfoValidationRules/>
-                        </Binding.ValidationRules>
-                    </Binding>
-                </TextBox>
-                <TextBox x:Name="edtStep" HorizontalAlignment="Left" Height="18" Margin="229,159,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
-                    <TextBox.Style>
-                        <Style TargetType="{x:Type TextBox}">
-                            <Style.Triggers>
-                                <Trigger Property="Validation.HasError" Value="True">
-                                    <Setter Property="ToolTip"
-                                    Value="{Binding (Validation.Errors)/ErrorContent, RelativeSource={x:Static RelativeSource.Self}}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                    <Binding Path="sStep"
-                         UpdateSourceTrigger="PropertyChanged"
-                         Mode="TwoWay">
-                        <Binding.ValidationRules>
-                            <validation:NumberInfoValidationRules/>
-                        </Binding.ValidationRules>
-                    </Binding>
-                </TextBox>
+                <Label x:Name="lblStatus" Content="Статус: -" HorizontalAlignment="Left" Margin="5,156,0,0" VerticalAlignment="Top" Height="32" Width="178"/>
+                <Button x:Name="btnStart" Content="Запустить" HorizontalAlignment="Left" Margin="229,159,0,0" VerticalAlignment="Top" Width="75" Click="btnStart_Click" Height="20"/>
             </Grid>
         </GroupBox>
-        <Label x:Name="lblStep" Content="Шаг:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="222,179,0,0" Height="26" Width="36"/>
-        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValues, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="368,17,20,0"  MinColumnWidth="104" CanUserResizeColumns="False" MaxWidth="500" Height="248" MaxHeight="256" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
+        <DataGrid x:Name="dtRegValues" ItemsSource="{Binding NewRegValues, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="368,17,20,0"  MinColumnWidth="104" CanUserResizeColumns="False" MaxWidth="500" Height="267" MaxHeight="270" VerticalAlignment="Top" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="rAddress" Binding="{Binding RegAddress, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Header="Рег.адрес" MinWidth="100" Width="*" IsReadOnly="True">
                     <DataGridTextColumn.HeaderStyle>
@@ -175,15 +135,58 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridComboBoxColumn x:Name="cb_rValue" Visibility="Collapsed" ItemsSource="{Binding B_Values, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedItemBinding="{Binding Bool_Value}" Header="Новое значение" MinWidth="100" Width="*">
-                    <DataGridComboBoxColumn.HeaderStyle>
-                        <Style TargetType="{x:Type DataGridColumnHeader}">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        </Style>
-                    </DataGridComboBoxColumn.HeaderStyle>
-                </DataGridComboBoxColumn>
+                <DataGridTemplateColumn x:Name="cb_rValue" Visibility="Collapsed" Header="Новое значение" MinWidth="100" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!--<ComboBox x:Name="cbValue" ItemsSource="{Binding B_Values, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Bool_Value" SelectedItem="{Binding CbSelectItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></ComboBox>-->
+                            <ComboBox x:Name="cbValue" ItemsSource="{Binding B_Values, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Bool_Value" SelectedIndex="{Binding CbSelectItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></ComboBox>
+
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+        <Label x:Name="lblStartValue" Content="Стартовый адрес:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="32,226,0,0" Height="26" Width="108"/>
+        <TextBox x:Name="edtStartValue" HorizontalAlignment="Left" Height="18" Margin="139,231,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65" FontSize="10" UndoLimit="65535" Validation.ErrorTemplate="{StaticResource ValidationError}">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip"
+                                Value="{Binding (Validation.Errors)/ErrorContent, RelativeSource={x:Static RelativeSource.Self}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+            <Binding Path="sStartValue"
+                UpdateSourceTrigger="PropertyChanged"
+                Mode="TwoWay">
+                <Binding.ValidationRules>
+                    <validation:NumberInfoValidationRules/>
+                </Binding.ValidationRules>
+            </Binding>
+        </TextBox>
+        <Label x:Name="lblStep" Content="Шаг:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="227,226,0,0" Height="26" Width="36"/>
+        <TextBox x:Name="edtStep" HorizontalAlignment="Left" Height="18" Margin="262,231,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="64" FontSize="10" Validation.ErrorTemplate="{StaticResource ValidationError}">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip"
+                                Value="{Binding (Validation.Errors)/ErrorContent, RelativeSource={x:Static RelativeSource.Self}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+            <Binding Path="sStep"
+                UpdateSourceTrigger="PropertyChanged"
+                Mode="TwoWay">
+                <Binding.ValidationRules>
+                    <validation:NumberInfoValidationRules/>
+                </Binding.ValidationRules>
+            </Binding>
+        </TextBox>
+        <Button x:Name="btnUpdateData" Content="Обновить данные" HorizontalAlignment="Left" Margin="148,264,0,0" VerticalAlignment="Top" Width="108" Click="btnUpdate_Click" IsEnabled="False"/>
 
     </Grid>
 </Window>

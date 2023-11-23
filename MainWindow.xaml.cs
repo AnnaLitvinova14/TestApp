@@ -26,13 +26,20 @@ namespace WpfApp
 {
     public partial class MainWindow : Window
     {
-        ModbusTcpSlave Slave;//server
+        //server
+        ModbusTcpSlave Slave;
         TcpListener Listener;
 
-        ModbusDataCollection<ushort> uRegister; //регистр типа ushort
-        ModbusDataCollection<bool> bRegister; //регистр типа bool
+        //регистр типа ushort
+        ModbusDataCollection<ushort> uRegister; 
 
-        DataNewRegValues item; //запись; относится к таблице
+        //регистр типа bool
+        ModbusDataCollection<bool> bRegister; 
+
+        //запись; относится к таблице
+        DataNewRegValues item;
+
+        string SelectItemValue;
 
         //словарик для записи внесенных в таблицу значений со стороны сервера
         Dictionary<int, string> updateRegValues = new Dictionary<int, string>(); 
@@ -52,75 +59,111 @@ namespace WpfApp
         //для колонки таблицы с combobox 
         ObservableCollection<BoolValue> collectionB_Values = new ObservableCollection<BoolValue>()
         {
-            new BoolValue(){ Bool_Value = "True" },
-            new BoolValue(){ Bool_Value = "False" }
+            new BoolValue(){ Bool_Value = "False" },
+            new BoolValue(){ Bool_Value = "True" }
         };
         
         //таймер
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
-     
-        DataForConnection objectInfo;//datacontex всего окна
-        int flagVisibility;//флаг для видимости в таблице колонки "Новое значение"
+
+        //datacontex всего окна
+        DataForConnection objectInfo;
+
+        //флаг для видимости в таблице колонки "Новое значение"
+        int flagVisibility;
         public MainWindow()
         {
             InitializeComponent();
 
-            objectInfo = new DataForConnection //подвязываем значения по умолчанию к UI
+            //подвязываем значения по умолчанию к UI
+            objectInfo = new DataForConnection 
             {
                 sIPAdr = Constans.sIP_default,
                 sPortTCP = Constans.sTCP_default,
                 sClient = Constans.sClient_default,
                 sStartValue = Constans.sStartValue_default,
                 sStep = Constans.sStep_default,
-                NewRegValues = collectionRegValues, //подвязали коллекцию (рег+значения) таблицы к свойству графического элемента datagrid
-                Registers = collectionRegisters //подвязали коллекцию регистров к свойству графического элемента combobox
+                //подвязали коллекцию (рег+значения) таблицы к свойству графического элемента datagrid
+                NewRegValues = collectionRegValues,
+                //подвязали коллекцию регистров к свойству графического элемента combobox
+                Registers = collectionRegisters 
             };
 
-            this.DataContext = objectInfo;//привязка dataContext всего окна
+            //привязка dataContext всего окна
+            this.DataContext = objectInfo;
         }
 
         private void UpdateDataGrid() //обновление данных в таблице
         {
-            int countRecords = int.Parse(objectInfo.sStep); //шаг записей
-            int iStartValue = int.Parse(objectInfo.sStartValue); //с какой записи стартуем
+            //шаг записей
+            int countRecords = int.Parse(objectInfo.sStep);
+            //с какой записи стартуем
+            int iStartValue = int.Parse(objectInfo.sStartValue);
 
-            //чтение новых, введенных в таблицу, значений в словарик перед очисткой таблицы
+            int indexCombobox = 0;
+
+            //СТАРТ чтение новых, введенных в таблицу, значений в словарик перед очисткой таблицы
             updateRegValues.Clear();
+            //если есть новые введенные значения
             if (objectInfo.NewRegValues.Count > 0)
-            {                
+            {
+                //пробег по таблице
                 for (int j = 0; j < objectInfo.NewRegValues.Count; j++)
                 {
-                    updateRegValues.Add(int.Parse(objectInfo.NewRegValues[j].RegAddress), objectInfo.NewRegValues[j].RegValue);
+                    //если столбец с изменениями текстовый
+                    if (flagVisibility == 0)
+                    {                        
+                        //запись в словарик по нужному адресу(ключ) нового введенного значения
+                        updateRegValues.Add(int.Parse(objectInfo.NewRegValues[j].RegAddress), objectInfo.NewRegValues[j].RegValue);
+                    }
+                    else if (flagVisibility == 1)
+                    {                     
+                        SelectItemValue = Convert.ToBoolean(objectInfo.NewRegValues[j].CbSelectItem) ? "True" : "False";
+                        updateRegValues.Add(int.Parse(objectInfo.NewRegValues[j].RegAddress), SelectItemValue);
+                    }
                 }
             }
 
-            //обновление таблицы
-            collectionRegValues.Clear();
+            //обновление таблицы, внесение записей
+            collectionRegValues.Clear(); 
             for (int i = iStartValue; i < countRecords + iStartValue; i++)
-            {           
-                if (flagVisibility == 1) //если = 1, отобразить столбец с комбобокс
+            {
+                string result;
+                //если есть измененные значения в словарике и по адресу можно получить новое значение
+                if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue))
                 {
-                    Console.WriteLine("flagVisibility == 1");
-                    /*if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue)
-                        item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue), null, collectionB_Values)
-                    else*/
-
-                }
-                else //отобразить редактируемый столбец без комбобокс
-                {
-                    Console.WriteLine("flagVisibility == " + flagVisibility.ToString());
-                    //если есть измененные значения и по адресу можно получить новое значение
-                    if (updateRegValues.Count != 0 && updateRegValues.TryGetValue(i, out string sRegValue))
+                    result = RegisterType(i, sRegValue);
+                    //для текстового столбца таблицы
+                    if (flagVisibility == 0)
                     {
-                        item = new DataNewRegValues(i.ToString(), RegisterType(i, sRegValue)); //запись в таблицу с новыми значениями
-                    }    
+                        //запись в таблицу с новыми значениями
+                        item = new DataNewRegValues(i.ToString(), result, null, indexCombobox);
+                    }
+                    //для комбобокс столбца таблицы
                     else
                     {
-                        item = new DataNewRegValues(i.ToString(), RegisterType(i));//запись в таблицу старых значений
-                    }                        
-                }                
+                        if (result == "False") indexCombobox = 0; else indexCombobox = 1;
+                        item = new DataNewRegValues(i.ToString(), result, collectionB_Values, indexCombobox);
+                    }
+                }
+                //если нет изменений, грузим текущие значения клиента
+                else
+                {
+                    //запись в таблицу текущих значений
+                    //0 - текстовый; 1 - комбобокс
+                    result = RegisterType(i);
+                    if (flagVisibility == 0)
+                        item = new DataNewRegValues(i.ToString(), result, null, indexCombobox);
+                    else
+                    {
+                        if (result == "False") indexCombobox = 0; else indexCombobox = 1;
+                        item = new DataNewRegValues(i.ToString(), result, collectionB_Values, indexCombobox);
+                    }
+
+                }
                 collectionRegValues.Add(item);
             }
+            //КОНЕЦ чтение новых, введенных в таблицу, значений в словарик перед очисткой таблицы
 
         }
 
@@ -152,18 +195,17 @@ namespace WpfApp
             {
                 if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.H_Register)
                 {
-                    flagVisibility = 0;
                     VisibilityColumns(flagVisibility);
                     uRegister = Slave.DataStore.HoldingRegisters;
-                    
-                    if (rValue != null) //если есть новое значение, то присваиваем его регистру по нужному адресу
+
+                    //если есть новое значение, то присваиваем его регистру по нужному адресу
+                    if (rValue != null) 
                         uRegister[rAddr] = ushort.Parse(rValue);
                     
                     Result = uRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.I_Register)
                 {
-                    flagVisibility = 2;
                     VisibilityColumns(flagVisibility);
                     uRegister = Slave.DataStore.InputRegisters;
 
@@ -171,18 +213,18 @@ namespace WpfApp
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.C_Register)
                 {
-                    flagVisibility = 1;
                     VisibilityColumns(flagVisibility);
                     bRegister = Slave.DataStore.CoilDiscretes;
 
-                    if (rValue != null) //если есть новое значение, то присваиваем его регистру по нужному адресу
+                    //если есть новое значение, то присваиваем его регистру по нужному адресу
+                    if (rValue != null)
                         bRegister[rAddr] = bool.Parse(rValue);
 
+                    //  Console.WriteLine($"rAddr = {rAddr}; rValue = {rValue}");
                     Result = bRegister[rAddr].ToString();
                 }
                 else if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.DI_Register)
                 {
-                    flagVisibility = 2;
                     VisibilityColumns(flagVisibility);
                     bRegister = Slave.DataStore.InputDiscretes;
                     Result = bRegister[rAddr].ToString();
@@ -194,7 +236,8 @@ namespace WpfApp
 
         private void btnStart_Click(object sender, RoutedEventArgs e)//нажатие на кнопку "Запустить"/"Остановить"
         {
-            if (btnStart.Content.ToString() == "Запустить")//нажатие на кнопку "Запустить"
+            //нажатие на кнопку "Запустить"
+            if (btnStart.Content.ToString() == "Запустить")
             {
                 btnStart.Content = "Остановить";
                 Listener = new TcpListener(IPAddress.Parse(objectInfo.sIPAdr), int.Parse(objectInfo.sPortTCP));
@@ -209,7 +252,8 @@ namespace WpfApp
                 timer.Interval = new TimeSpan(0, 0, 5);
                 timer.Start();
             }
-            else if (btnStart.Content.ToString() == "Остановить")//нажатие на кнопку "Остановить"
+            //нажатие на кнопку "Остановить"
+            else if (btnStart.Content.ToString() == "Остановить")
             {
                 btnStart.Content = "Запустить";
                 btnUpdateData.IsEnabled = false;
@@ -239,7 +283,23 @@ namespace WpfApp
                     Slave.Masters[i].Client.Disconnect(false);
                 }
             }
-            UpdateDataGrid();
+        }
+
+        private void cbTypeRegister_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //присвоение значения флагу видимости колонки "Новое значение"
+            //0 - текстовый столбец; 1 - комбобокс; 2 - скрыть
+            if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.H_Register) 
+                flagVisibility = 0;
+            else 
+            if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.I_Register || objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.DI_Register)
+                flagVisibility = 2;
+            else 
+            if (objectInfo.Registers[cbTypeRegister.SelectedIndex].NameRegister == Constans.C_Register)
+                flagVisibility = 1;
+
+            if (Slave != null)
+                UpdateDataGrid();
         }
 
     }

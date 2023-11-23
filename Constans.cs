@@ -8,7 +8,6 @@ namespace WpfApp
 {
     public class Constans
     {
-        //string
         //-------значения по умолчанию
         public const string sClient_default = "1";
         public const string sIP_default = "127.0.0.1";
@@ -21,10 +20,8 @@ namespace WpfApp
         public const string C_Register = "Coils";
         public const string DI_Register = "Discrete Inputs";
 
-        //int
         public const int CONST_REG_OUTPUT = 123;
         
-        //byte
         public const byte slaveID = 1;
 
     }
